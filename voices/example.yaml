@@ -1,0 +1,7 @@
+Model: "example" # Model name in RVC-TTS-WEBUI
+Speed: 0 # Speed of the speech (-100 - 100; 0 - default speed) 
+Voice: "en-US-AriaNeural-Female" # Base voice
+Transpose: 0 # Octave control
+PEM: "rmvpe" # Pitch extraction method
+Index: 1 
+Protect: 0.33

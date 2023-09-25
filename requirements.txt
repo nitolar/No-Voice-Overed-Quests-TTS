@@ -1,0 +1,6 @@
+pillow
+gradio_client
+keyboard
+easyocr
+pyttsx3
+psutil

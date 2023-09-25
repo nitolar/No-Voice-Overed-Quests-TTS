@@ -1,0 +1,5 @@
+tmp/
+voices/*
+!voices/example.yaml
+!voices/! NAME OF THE FILE SHOULD BE INGAME CHAR NAME !.txt
+test.py
