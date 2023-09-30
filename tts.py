@@ -93,12 +93,19 @@ def main(search):
                     text_l.remove(i)
             c = 0
             for i in text_l:
-                text_l[c] = i.replace('__', '...')
-                text_l[c] = i.replace('_', '.')
-                text_l[c] = i.replace('$', 's')
-                text_l[c] = i.replace(':', '.')
+                text_l[c] = text_l[c].replace('__', '...')
+                text_l[c] = text_l[c].replace('_', '.')
+                text_l[c] = text_l[c].replace('$', 's')
+                text_l[c] = text_l[c].replace(':', '.')
+                text_l[c] = text_l[c].replace(';', '.')
+                text_l[c] = text_l[c].replace('|', 'I')
                 c += 1
             print(f"Text final: {text_l}") # ["Ad astra abyssosque! Welcome to the Adventurers' Guild."]
+            
+            if not text_l:
+                print("No text was found")
+                print("MAIN | STOP")
+                continue
             
             if settings['use-ai'] == True:
                 """MODEL LOADING"""

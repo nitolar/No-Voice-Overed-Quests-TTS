@@ -81,6 +81,12 @@ python tts.py
 
 ## Changelog
 
+### 30.09.2023
+
+- Fixed script crashing if no text was found.
+- Fixed script not replacing commonly misinterpreted characters.
+- Added some new commonly misinterpreted characters.
+
 ### 25.09.2023
 
 - Initial release.
