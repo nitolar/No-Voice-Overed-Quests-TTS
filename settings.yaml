@@ -1,10 +1,11 @@
-use-gpu: False # Whether to use GPU or CPU to recognize text. REMEMBER YOUR GAME CAN TAKE SIGNIFICANT PERFORMANCE HIT IF SET ON True. On my cpu Ryzen 7 5700X it works pretty fast.
-mode: "key" # What type of key press detection you want. "key" - pressing action key specified below will start looking for text. "auto" - will react after x amount of seconds after pressing space key or mouse1, action key specified below will stop/start reacting to space or mouse1 presses.
+use-gpu: False # Whether to use GPU or CPU to recognize text. REMEMBER YOUR GAME CAN TAKE A SIGNIFICANT PERFORMANCE HIT IF SET TO True. On my CPU, Ryzen 7 5700X, it works pretty fast.
+mode: "key" # What type of key press detection do you want. "key" - pressing the action key specified below will start looking for text. "auto" - will react after x amount of seconds after pressing the space key or mouse1; the action key specified below will stop/start reacting to space or mouse1 presses.
 key: "`" # Action key ONLY KEYBOARD
 exit-key: "/" # Exit key ONLY KEYBOARD
 game: "gs" # "gs" or "hsr". Both games have a little different name positions lol.
-auto-sleep: 4 # How much time to wait after clicking a key in auto mode before it will starting to look for text.
-use-ai: True # If you want to generate ai voices set this to True if not False. REMEMBER YOUR GAME CAN TAKE SIGNIFICANT PERFORMANCE HIT IF SET ON True.
-gradio: "http://127.0.0.1:7860/" # Url of your gradio server. If you host it on your machine and you haven't change a port this url should work.
-no-voice: True # If no voice model for character in folder "voices" use pyttsx3 as tts or defined deafult voice. If False, no actions will be taken.
-default-voice: null # Default voice model to use if can't find name of character. For ex. "example" or null if you want to use pyttsx3.
+auto-sleep: 4 # How much time to wait after clicking a key in auto mode before it starts to look for text.
+use-ai: True # If you want to generate AI voices, set this to True; if not, set it to False. REMEMBER YOUR GAME CAN TAKE A SIGNIFICANT PERFORMANCE HIT IF SET TO True.
+gradio: "http://127.0.0.1:7860/" # URL of your Gradio server. If you host it on your machine and you haven't changed the port, this URL should work.
+no-voice: True # If no voice model for the character is in the "voices" folder, use pyttsx3 as TTS or the defined default voice. If False, no actions will be taken.
+default-voice: null # Default voice model to use if the name of the character can't be found. For example, "example" or null if you want to use pyttsx3.
+alt-tab: False # After upgrading my GPU, I discovered that getting text from an image and generating voice takes very long (over 1 minute) but only when the game is focused. So, this option will automatically alt-tab to another program to make it faster (around 3-5 seconds). If you're facing the same problem as me, it's good to try this option. Best case scenario, you have a second screen on which you can alt-tab to another program to not cover your game with some other program.

@@ -4,3 +4,5 @@ keyboard
 easyocr
 pyttsx3
 psutil
+fuzzywuzzy
+python-Levenshtein

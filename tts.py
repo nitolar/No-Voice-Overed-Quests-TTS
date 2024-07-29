@@ -2,7 +2,8 @@ from PIL import ImageGrab
 from time import sleep
 from gradio_client import Client as g_Client
 from multiprocessing import Process, Pipe, Value
-from keyboard import is_pressed
+from keyboard import is_pressed, press, release
+from fuzzywuzzy import fuzz
 import easyocr, os, yaml, pyttsx3, ctypes, signal, psutil, win32api, subprocess
 with open('settings.yaml', 'r') as file:
     settings = yaml.full_load(file)
@@ -79,27 +80,58 @@ def main(search):
             options.save("tmp/op.png")
             
             """GET NAME AND TEXT"""
-            options_l: list = reader.readtext('tmp/op.png', detail = 0)
+            if settings['alt-tab'] == True:
+                press("alt")
+                sleep(0.2)
+                press("tab")
+                sleep(0.2)
+                release("tab")
+                sleep(0.2)
+                release("alt")
+            options_l: list = reader.readtext('tmp/op.png', detail = 0, paragraph=True)
             print(f"Options: {options_l}") # ['Claim Daily Commission Reward', 'Claim Adventure Rank Rewards', 'Dispatch Character on Expedition', 'We meet again, Katheryne.', 'Are you also a clockwork puppet,', 'Katheryne?', 'See you:']
             name_l: list = reader.readtext('tmp/name.png', detail = 0)
             print(f"Name: {name_l}") # ['Katheryne', "Receptionist, Adventurers' Guild"]
-            text_l: list = reader.readtext('tmp/text.png', detail = 0)
+            text_l: list = reader.readtext('tmp/text.png', detail = 0, paragraph=True)
             print(f"Text original: {text_l}") # ["See you:", 'Katheryne', "Receptionist, Adventurers' Guild", "Ad astra abyssosque! Welcome to the Adventurers' Guild."]
             for i in name_l:
-                if i in text_l:
+                if i in text_l or ' '.join(name_l) in text_l:
                     text_l.remove(i)
+            try:
+                if name_l.count() >= 2:
+                    for i in name_l:
+                        if f"{name_l[0]} {name_l[1]}" in text_l:
+                            text_l.remove(i)
+            except Exception: # List empty lol
+                pass
             for i in options_l:
                 if i in text_l:
                     text_l.remove(i)
+            for i in options_l:
+                for ii in text_l:
+                    if fuzz.ratio(ii, i) >= 90:
+                        text_l.remove(ii)
             c = 0
             for i in text_l:
                 text_l[c] = text_l[c].replace('__', '...')
+                text_l[c] = text_l[c].replace('-_', '...')
+                text_l[c] = text_l[c].replace('_-', '...')
+                text_l[c] = text_l[c].replace('ooo', '...') # It’s rare to have three "o"s in a row, but it can sometimes happen ¯\_(ツ)_/¯. Better than having three "o"s at the end of a word.
+                text_l[c] = text_l[c].replace('.=', '...')
                 text_l[c] = text_l[c].replace('_', '.')
-                text_l[c] = text_l[c].replace('$', 's')
                 text_l[c] = text_l[c].replace(':', '.')
                 text_l[c] = text_l[c].replace(';', '.')
                 text_l[c] = text_l[c].replace('|', 'I')
+                text_l[c] = text_l[c].replace('$', 's')
+                text_l[c] = text_l[c].replace('0f', 'of')
+                text_l[c] = text_l[c].replace('0t', 'of')
+                text_l[c] = text_l[c].replace('Tve', 'I\'ve')
                 c += 1
+            try:
+                if text_l[0].startswith(name_l[0]):
+                    text_l[0] = text_l[0][len(name_l[0]):]
+            except Exception: # List empty lol
+                pass   
             print(f"Text final: {text_l}") # ["Ad astra abyssosque! Welcome to the Adventurers' Guild."]
             
             if not text_l:
@@ -148,8 +180,16 @@ def main(search):
                         model['Protect'],	# int | float (numeric value between 0 and 0.5) in 'Protect' Slider component
                         fn_index=0
                         )
+                    if settings['alt-tab'] == True:
+                        press("alt")
+                        sleep(0.2)
+                        press("tab")
+                        sleep(0.2)
+                        release("tab")
+                        sleep(0.2)
+                        release("alt")
                     print("Playing sound")
-                    subprocess.call(["ffplay", "-loglevel", "quiet", "-nodisp", "-autoexit", result[-1].replace('\\', '\\\\')]) # no playsound because some files have weird bitrate and it won't play lol
+                    subprocess.call(["ffplay", "-loglevel", "quiet", "-nodisp", "-autoexit", result[-1].replace('\\', '\\\\')]) # No `playsound` because some files have unusual bitrates and won't play lol
             else:
                 print("Playing sound")
                 engine.say(' '.join(text_l))
