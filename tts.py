@@ -8,8 +8,27 @@ import easyocr, os, yaml, pyttsx3, ctypes, signal, psutil, win32api, subprocess
 with open('settings.yaml', 'r') as file:
     settings = yaml.full_load(file)
 
+"""COLORS"""
+CEND     = '\33[0m'
+CBLACK   = '\33[30m'
+CRED     = '\33[31m'
+CGREEN   = '\33[32m'
+CYELLOW  = '\33[33m'
+CBLUE    = '\33[34m'
+CVIOLET  = '\33[35m'
+CBEIGE   = '\33[36m'
+CWHITE   = '\33[37m'
+CGREY    = '\33[90m'
+CRED2    = '\33[91m'
+CGREEN2  = '\33[92m'
+CYELLOW2 = '\33[93m'
+CBLUE2   = '\33[94m'
+CVIOLET2 = '\33[95m'
+CBEIGE2  = '\33[96m'
+CWHITE2  = '\33[97m'
+
 def wait_for_input(conn1, conn2, search):
-    print("Wait for input | ON")
+    print(CBEIGE2 + "Wait for input | ON" + CEND)
     val = 0
     p1_pid = conn2.recv()
     p2_pid = conn1.recv()
@@ -20,14 +39,14 @@ def wait_for_input(conn1, conn2, search):
         if settings['mode'] == 'auto':
             if val == 1:
                 if is_pressed("space"):
-                    print("Input detected")
+                    print(CYELLOW2 + "Input detected" + CEND)
                     sleep(settings['auto-sleep'])
                     search.value = 1
                 a = win32api.GetKeyState(0x01)
                 if a != state_left: # It fucking works!!!
                     state_left = a
                     if a < 0:
-                        print("Input detected")
+                        print(CYELLOW2 + "Input detected" + CEND)
                         sleep(settings['auto-sleep'])
                         search.value = 1
                     else:
@@ -35,21 +54,21 @@ def wait_for_input(conn1, conn2, search):
 
         if is_pressed(settings['key']):
             if settings['mode'] == 'key':
-                print("Input detected")
+                print(CYELLOW2 + "Input detected" + CEND)
                 search.value = 1
                 sleep(1)
             elif settings['mode'] == 'auto':
                 if val == 0:
-                    print("Turned on auto mode")
+                    print(CBLUE + "Turned on auto mode" + CEND)
                     val = 1
                     sleep(1)
                 elif val == 1:
-                    print("Turned off auto mode")
+                    print(CBLUE + "Turned off auto mode" + CEND)
                     val = 0
                     sleep(1)
 
         if is_pressed(settings['exit-key']):
-            print("Turning off")
+            print(CRED + "Turning off" + CEND)
             os.kill(p2_pid, signal.SIGTERM)
             os.kill(p1_pid, signal.SIGTERM)
         
@@ -58,14 +77,14 @@ def main(search):
     if settings['use-ai'] == True:
         client = g_Client(settings['gradio'])
     engine = pyttsx3.init()
-    print("MAIN | ON")
-    print(f"Script is running! \nYour action key is: {settings['key']} \nYour exit key is: {settings['exit-key']}")
+    print(CBEIGE2 + "MAIN | ON" + CEND)
+    print(f"{CGREEN2}Script is running! {CBLUE}\nYour action key is: {settings['key']} \nYour exit key is: {settings['exit-key']}{CEND}")
     if settings['mode'] == 'auto':
-        print(f"Your ranning script in auto mode. You need to press your action key to start the script!")
+        print(f"{CGREEN2}Your ranning script in auto mode. You need to press your action key to start the script!{CEND}")
     while True:
         if search.value == 1:
             search.value = 0
-            print("MAIN | START")
+            print(CBEIGE2 + "MAIN | START" + CEND)
             if os.path.exists("tmp/") == False:
                 os.mkdir("tmp/")
             """GET IMG"""
@@ -94,49 +113,84 @@ def main(search):
             print(f"Name: {name_l}") # ['Katheryne', "Receptionist, Adventurers' Guild"]
             text_l: list = reader.readtext('tmp/text.png', detail = 0, paragraph=True)
             print(f"Text original: {text_l}") # ["See you:", 'Katheryne', "Receptionist, Adventurers' Guild", "Ad astra abyssosque! Welcome to the Adventurers' Guild."]
+            print(CGREEN + "All: " + ' '.join(name_l) + CEND)
             for i in name_l:
-                if i in text_l or ' '.join(name_l) in text_l:
-                    text_l.remove(i)
+                if ' '.join(name_l) in text_l:
+                    print(CBLUE2 + f"1Del: {' '.join(name_l)}" + CEND)
+                    text_l.remove(' '.join(name_l))
+            for i in name_l:
+                for ii in text_l:
+                    if fuzz.ratio(ii, i) >= 80:
+                        print(CBLUE2 + f"2Del: {ii}" + CEND)
+                        text_l.remove(ii)
+            if len(name_l) >= 2:
+                print(CGREEN + f"0 1: {name_l[0]} {name_l[1]}" + CEND)
+                print(CGREEN + f"0 -1: {name_l[0]} {name_l[-1]}" + CEND)
+                for i in text_l:
+                    if fuzz.ratio(f"{name_l[0]} {name_l[1]}", i) >= 90:
+                        print(CBLUE2 + f"3.1Del: {name_l[0]} {name_l[1]}" + CEND)
+                        text_l.remove(f"{i}")
+                    elif fuzz.ratio(f"{name_l[0]} {name_l[1]}", i) >= 90:
+                        print(CBLUE2 + f"3.2Del: {name_l[0]} {name_l[-1]}" + CEND)
+                        text_l.remove(f"{i}")
             try:
-                if name_l.count() >= 2:
-                    for i in name_l:
-                        if f"{name_l[0]} {name_l[1]}" in text_l:
-                            text_l.remove(i)
+                print(CGREEN + f"startswith1: {name_l[0]} {name_l[1]}" + CEND)
+                print(CGREEN + "startswith2: " + name_l[0] + CEND)
+                print(CGREEN + "startswith3: " + name_l[1] + CEND)
+                if text_l[0].startswith(f"{name_l[0]} {name_l[1]}"):
+                    print(CBLUE2 + f"4.1Del: {name_l[0]} {name_l[1]}" + CEND)
+                    text_l[0] = text_l[0][len(name_l[0]) + 1 + len(name_l[1]):]
+                elif text_l[0].startswith(name_l[0]):
+                    print(CBLUE2 + f"4.2Del: {name_l[0]}" + CEND)
+                    text_l[0] = text_l[0][len(name_l[0]):]
+                elif text_l[0].startswith(name_l[1]):
+                    print(CBLUE2 + f"4.2Del: {name_l[1]}" + CEND)
+                    text_l[0] = text_l[0][len(name_l[1]):]
             except Exception: # List empty lol
-                pass
+                pass   
             for i in options_l:
                 if i in text_l:
+                    print(CBLUE2 + f"5Del: {i}" + CEND)
                     text_l.remove(i)
             for i in options_l:
                 for ii in text_l:
-                    if fuzz.ratio(ii, i) >= 90:
+                    if fuzz.ratio(ii, i) >= 80 or fuzz.ratio(ii, i[-len(ii):]) >= 80:
+                        print(CBLUE2 + f"6Del: {ii}" + CEND)
                         text_l.remove(ii)
             c = 0
             for i in text_l:
                 text_l[c] = text_l[c].replace('__', '...')
                 text_l[c] = text_l[c].replace('-_', '...')
                 text_l[c] = text_l[c].replace('_-', '...')
+                text_l[c] = text_l[c].replace('_.', '...')
                 text_l[c] = text_l[c].replace('ooo', '...') # It’s rare to have three "o"s in a row, but it can sometimes happen ¯\_(ツ)_/¯. Better than having three "o"s at the end of a word.
                 text_l[c] = text_l[c].replace('.=', '...')
                 text_l[c] = text_l[c].replace('_', '.')
                 text_l[c] = text_l[c].replace(':', '.')
                 text_l[c] = text_l[c].replace(';', '.')
                 text_l[c] = text_l[c].replace('|', 'I')
+                text_l[c] = text_l[c].replace('[', 'I')
                 text_l[c] = text_l[c].replace('$', 's')
                 text_l[c] = text_l[c].replace('0f', 'of')
                 text_l[c] = text_l[c].replace('0t', 'of')
                 text_l[c] = text_l[c].replace('Tve', 'I\'ve')
+                text_l[c] = text_l[c].replace('Tll', 'I\'ll')
+                text_l[c] = text_l[c].replace('Tm', 'I\'m')
+                text_l[c] = text_l[c].replace('Td', 'I\'d')
                 c += 1
-            try:
-                if text_l[0].startswith(name_l[0]):
-                    text_l[0] = text_l[0][len(name_l[0]):]
-            except Exception: # List empty lol
-                pass   
-            print(f"Text final: {text_l}") # ["Ad astra abyssosque! Welcome to the Adventurers' Guild."]
+            print(f"Text final: {text_l}" + CEND) # ["Ad astra abyssosque! Welcome to the Adventurers' Guild."]
             
             if not text_l:
-                print("No text was found")
-                print("MAIN | STOP")
+                print(CRED + "No text was found" + CEND)
+                if settings['alt-tab'] == True:
+                    press("alt")
+                    sleep(0.2)
+                    press("tab")
+                    sleep(0.2)
+                    release("tab")
+                    sleep(0.2)
+                    release("alt")
+                print(CBEIGE2 + "MAIN | STOP" + CEND)
                 continue
             
             if settings['use-ai'] == True:
@@ -156,19 +210,19 @@ def main(search):
                 
                 """GENE SPEECH"""
                 if model == None:
-                    print("No voice found")
+                    print(CBEIGE2 + "No voice found" + CEND)
                     if settings['no-voice'] == True:
                         if settings['default-voice'] == None:
-                            print("Using pyttsx3 \nPlaying sound")
+                            print(CBEIGE2 + "Using pyttsx3 \nPlaying sound" + CEND)
                             engine.say(' '.join(text_l))
                             engine.runAndWait()
                         else:
                             with open(f, 'r') as file:
-                                print("Setting voice to default")
+                                print(CBEIGE2 + "Setting voice to default" + CEND)
                                 with open(f"voices/{settings['default-voice'].replace('.yaml', '')}.yaml", 'r') as file:
                                     model = yaml.full_load(file)
                 if model != None:
-                    print(f"Voice found. Using: {model['Model']}")
+                    print(CBEIGE2 + f"Voice found. Using: {model['Model']}" + CEND)
                     result = client.predict(
                         model['Model'],	# str 'Model' Dropdown component
                         model['Speed'],	# int | float (numeric value between -100 and 100) in 'Speech speed (%)' Slider component
@@ -188,16 +242,17 @@ def main(search):
                         release("tab")
                         sleep(0.2)
                         release("alt")
-                    print("Playing sound")
+                    print(CYELLOW + "Playing sound" + CEND)
                     subprocess.call(["ffplay", "-loglevel", "quiet", "-nodisp", "-autoexit", result[-1].replace('\\', '\\\\')]) # No `playsound` because some files have unusual bitrates and won't play lol
             else:
-                print("Playing sound")
+                print(CYELLOW + "Playing sound" + CEND)
                 engine.say(' '.join(text_l))
                 engine.runAndWait()
             
-            print("MAIN | STOP")
+            print(CBEIGE2 + "MAIN | STOP" + CEND)
     
 if __name__ == "__main__":
+    os.system("") # To make colors always work
     if ctypes.windll.shell32.IsUserAnAdmin():
         value = Value("i", 0)
         conn1, conn2 = Pipe()
@@ -208,5 +263,5 @@ if __name__ == "__main__":
         conn1.send(p2.pid)
         conn2.send(p1.pid)
     else:
-        print("Admin mode is required to detect key presses! Please run as administrator and try again.")
+        print(CRED + "Admin mode is required to detect key presses! Please run as administrator and try again." + CEND)
         quit()

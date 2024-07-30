@@ -81,6 +81,14 @@ python tts.py
 
 ## Changelog
 
+### 30.07.2024
+
+- Improved the process of cleaning up text passed to be read by pyttsx3 or AI TTS.
+- Added more debugging text, making it easier to detect errors when creating the `Text Final`.
+- Added colors to improve the readability of the output.
+- Added some new commonly misinterpreted characters.
+- Fixed the alt-tab feature not alt-tabbing to the game if no text was found.
+
 ### 29.07.2024
 
 - Refined the text extraction accuracy; it should now be more precise.
