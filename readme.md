@@ -81,6 +81,13 @@ python tts.py
 
 ## Changelog
 
+### 22.09.2024
+
+- Improved the process of cleaning up text passed to be read by pyttsx3 or AI TTS.
+- Improved finding model file
+- Added some new commonly misinterpreted characters.
+- Increased the possible area for a name to appear in genshin
+
 ### 30.07.2024
 
 - Improved the process of cleaning up text passed to be read by pyttsx3 or AI TTS.

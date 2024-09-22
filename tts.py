@@ -77,6 +77,7 @@ def main(search):
     if settings['use-ai'] == True:
         client = g_Client(settings['gradio'])
     engine = pyttsx3.init()
+    startswitch_skip = False
     print(CBEIGE2 + "MAIN | ON" + CEND)
     print(f"{CGREEN2}Script is running! {CBLUE}\nYour action key is: {settings['key']} \nYour exit key is: {settings['exit-key']}{CEND}")
     if settings['mode'] == 'auto':
@@ -89,7 +90,7 @@ def main(search):
                 os.mkdir("tmp/")
             """GET IMG"""
             if settings['game'] == "gs":
-                name = ImageGrab.grab(bbox =(700, 830, 1230, 925))
+                name = ImageGrab.grab(bbox =(700, 780, 1230, 925))
             elif settings['game'] == "hsr":
                 name = ImageGrab.grab(bbox =(700, 790, 1230, 860))
             text = ImageGrab.grab(bbox =(200, 780, 1880, 1040))
@@ -114,15 +115,19 @@ def main(search):
             text_l: list = reader.readtext('tmp/text.png', detail = 0, paragraph=True)
             print(f"Text original: {text_l}") # ["See you:", 'Katheryne', "Receptionist, Adventurers' Guild", "Ad astra abyssosque! Welcome to the Adventurers' Guild."]
             print(CGREEN + "All: " + ' '.join(name_l) + CEND)
+            startswitch_skip = False
             for i in name_l:
                 if ' '.join(name_l) in text_l:
                     print(CBLUE2 + f"1Del: {' '.join(name_l)}" + CEND)
                     text_l.remove(' '.join(name_l))
+                    startswitch_skip = True
             for i in name_l:
                 for ii in text_l:
                     if fuzz.ratio(ii, i) >= 80:
                         print(CBLUE2 + f"2Del: {ii}" + CEND)
                         text_l.remove(ii)
+                        startswitch_skip = True
+            print(f"startswitch_skip: {startswitch_skip}")
             if len(name_l) >= 2:
                 print(CGREEN + f"0 1: {name_l[0]} {name_l[1]}" + CEND)
                 print(CGREEN + f"0 -1: {name_l[0]} {name_l[-1]}" + CEND)
@@ -133,30 +138,39 @@ def main(search):
                     elif fuzz.ratio(f"{name_l[0]} {name_l[1]}", i) >= 90:
                         print(CBLUE2 + f"3.2Del: {name_l[0]} {name_l[-1]}" + CEND)
                         text_l.remove(f"{i}")
-            try:
-                print(CGREEN + f"startswith1: {name_l[0]} {name_l[1]}" + CEND)
-                print(CGREEN + "startswith2: " + name_l[0] + CEND)
-                print(CGREEN + "startswith3: " + name_l[1] + CEND)
-                if text_l[0].startswith(f"{name_l[0]} {name_l[1]}"):
-                    print(CBLUE2 + f"4.1Del: {name_l[0]} {name_l[1]}" + CEND)
-                    text_l[0] = text_l[0][len(name_l[0]) + 1 + len(name_l[1]):]
-                elif text_l[0].startswith(name_l[0]):
-                    print(CBLUE2 + f"4.2Del: {name_l[0]}" + CEND)
-                    text_l[0] = text_l[0][len(name_l[0]):]
-                elif text_l[0].startswith(name_l[1]):
-                    print(CBLUE2 + f"4.2Del: {name_l[1]}" + CEND)
-                    text_l[0] = text_l[0][len(name_l[1]):]
-            except Exception: # List empty lol
-                pass   
             for i in options_l:
                 if i in text_l:
-                    print(CBLUE2 + f"5Del: {i}" + CEND)
+                    print(CBLUE2 + f"4Del: {i}" + CEND)
                     text_l.remove(i)
             for i in options_l:
                 for ii in text_l:
                     if fuzz.ratio(ii, i) >= 80 or fuzz.ratio(ii, i[-len(ii):]) >= 80:
-                        print(CBLUE2 + f"6Del: {ii}" + CEND)
+                        print(CBLUE2 + f"5Del: {ii}" + CEND)
                         text_l.remove(ii)
+            if startswitch_skip == False:
+                try:
+                    print(CGREEN + f"startswith1: {name_l[0]} {name_l[1]}" + CEND)
+                    if text_l[0].startswith(f"{name_l[0]} {name_l[1]}"):
+                        print(CBLUE2 + f"6.1Del: {name_l[0]} {name_l[1]}" + CEND)
+                        text_l[0] = text_l[0][len(name_l[0]) + 1 + len(name_l[1]):]
+                    else:
+                        raise Exception("Wrong startswitch")
+                except Exception:
+                    try:
+                        print(CGREEN + "startswith2: " + name_l[0] + CEND)
+                        if text_l[0].startswith(name_l[0]):
+                            print(CBLUE2 + f"6.2Del: {name_l[0]}" + CEND)
+                            text_l[0] = text_l[0][len(name_l[0]):]
+                        else:
+                            raise Exception("Wrong startswitch")
+                    except Exception:
+                        try:
+                            print(CGREEN + "startswith3: " + name_l[1] + CEND)
+                            if text_l[0].startswith(name_l[1]):
+                                print(CBLUE2 + f"6.3Del: {name_l[1]}" + CEND)
+                                text_l[0] = text_l[0][len(name_l[1]):]
+                        except Exception: # List empty lol
+                            pass
             c = 0
             for i in text_l:
                 text_l[c] = text_l[c].replace('__', '...')
@@ -173,6 +187,7 @@ def main(search):
                 text_l[c] = text_l[c].replace('$', 's')
                 text_l[c] = text_l[c].replace('0f', 'of')
                 text_l[c] = text_l[c].replace('0t', 'of')
+                text_l[c] = text_l[c].replace('0r', 'or')
                 text_l[c] = text_l[c].replace('Tve', 'I\'ve')
                 text_l[c] = text_l[c].replace('Tll', 'I\'ll')
                 text_l[c] = text_l[c].replace('Tm', 'I\'m')
@@ -201,7 +216,7 @@ def main(search):
                     if os.path.isfile(f):
                         if f.endswith(".yaml"):
                             try:
-                                if model_.replace('.yaml', '') == name_l[0] or model_.replace('.yaml', '') == f"{name_l[0]} {name_l[1]}":
+                                if model_.replace('.yaml', '') == name_l[0] or model_.replace('.yaml', '') == name_l[1] or model_.replace('.yaml', '') == f"{name_l[0]} {name_l[1]}":
                                     with open(f, 'r') as file:
                                         model = yaml.full_load(file)
                                     break
